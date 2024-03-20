@@ -15,10 +15,48 @@ type timeBucket struct {
 	elapsedTime  time.Duration
 }
 
-func addElapsedTime(bucket *timeBucket, startTime time.Time, m *model) {
-	bucket.elapsedTime += time.Since(bucket.startTime)
-	storeBucketData(*bucket, m.datastore)
-	bucket.startTime = startTime
+func addElapsedTime(startTime time.Time, m *model) {
+	// Update the selected bucket
+	m.buckets[m.selected].elapsedTime += time.Since(m.buckets[m.selected].startTime)
+	storeBucketData(m.buckets[m.selected], m.datastore)
+	m.buckets[m.selected].startTime = startTime
+
+	// Update the parent bucket
+	m.buckets[m.buckets[m.selected].parentBucket].elapsedTime += time.Since(m.buckets[m.buckets[m.selected].parentBucket].startTime)
+	storeBucketData(m.buckets[m.buckets[m.selected].parentBucket], m.datastore)
+	m.buckets[m.buckets[m.selected].parentBucket].startTime = startTime
+
+	// Update the total, if we happen to be operating on a second level bucket
+	if m.buckets[m.selected].level == "second" {
+		m.buckets[0].elapsedTime += time.Since(m.buckets[0].startTime)
+		storeBucketData(m.buckets[0], m.datastore)
+		m.buckets[0].startTime = startTime
+	}
+}
+
+func selectBucket(m *model) (tea.Model, tea.Cmd) {
+	startTime := time.Now()
+	if m.activeSelection {
+		// If we were tracking time already, update that bucket and it's parents
+		addElapsedTime(startTime, m)
+	}
+	if m.cursor == m.selected {
+		// Clear the selection marker and indicate no active selection
+		m.selected = -1
+		m.activeSelection = false
+		return m, nil
+	} else {
+		// Update selected to where the cursor is and indicate active selection
+		m.selected = m.cursor
+		m.activeSelection = true
+		m.buckets[m.selected].startTime = startTime
+		m.buckets[m.buckets[m.selected].parentBucket].startTime = startTime
+		if m.buckets[m.selected].level == "second" {
+			m.buckets[0].startTime = startTime
+		}
+		// Start the tick loop for the selection
+		return m, elapsedtimeTick(m.timeUpdateInterval)
+	}
 }
 
 func resetDay(m *model) (tea.Model, tea.Cmd) {

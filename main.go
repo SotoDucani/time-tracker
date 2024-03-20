@@ -56,42 +56,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		case key.Matches(msg, m.keys.Select):
 			log.Printf("KeyMsg recieved: %s", msg.String())
-			startTime := time.Now()
-			if m.cursor == m.selected { // If we're deselecting the current bucket
-				// Stop the selected bucket
-				addElapsedTime(&m.buckets[m.selected], startTime, &m)
-				// Stop the parent bucket
-				addElapsedTime(&m.buckets[m.buckets[m.selected].parentBucket], startTime, &m)
-				// Stop the total bucket
-				if m.buckets[m.selected].level == "second" {
-					addElapsedTime(&m.buckets[0], startTime, &m)
-				}
-				// Clear the selection marker and indicate no active selection
-				m.selected = -1
-				m.activeSelection = false
-				return m, nil
-			} else { // If we're selecting a new bucket to start
-				// Stop the previously selected bucket if we had one
-				if m.activeSelection {
-					// Add time to the selected bucket
-					addElapsedTime(&m.buckets[m.selected], startTime, &m)
-					// Add time to the parent bucket
-					addElapsedTime(&m.buckets[m.buckets[m.selected].parentBucket], startTime, &m)
-					// Add time to the total bucket
-					if m.buckets[m.selected].level == "second" {
-						addElapsedTime(&m.buckets[0], startTime, &m)
-					}
-				}
-				// Update selected to where the cursor is and indicate active selection
-				m.selected = m.cursor
-				m.activeSelection = true
-				m.buckets[m.selected].startTime = startTime
-				m.buckets[m.buckets[m.selected].parentBucket].startTime = startTime
-				if m.buckets[m.selected].level == "second" {
-					m.buckets[0].startTime = startTime
-				}
-				return m, elapsedtimeTick(m.timeUpdateInterval)
-			}
+			return selectBucket(&m)
 		case key.Matches(msg, m.keys.ResetDay):
 			log.Printf("KeyMsg recieved: %s", msg.String())
 			return resetDay(&m)
@@ -101,17 +66,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case elapsedTickMsg:
 		// Doing this at slower tick pace so we're not tying updates to the spinner FPS
+		// Pace is dictated by m.timeUpdateInterval
 		if m.activeSelection {
 			startTime := time.Now()
-			// Add our elapsed time
 			// Add time to the selected bucket
-			addElapsedTime(&m.buckets[m.selected], startTime, &m)
-			// Add time to the parent bucket
-			addElapsedTime(&m.buckets[m.buckets[m.selected].parentBucket], startTime, &m)
-			// Add time to the total bucket
-			if m.buckets[m.selected].level == "second" {
-				addElapsedTime(&m.buckets[0], startTime, &m)
-			}
+			addElapsedTime(startTime, &m)
 			return m, elapsedtimeTick(m.timeUpdateInterval)
 		} else {
 			return m, nil
