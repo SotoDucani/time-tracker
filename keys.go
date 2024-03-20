@@ -22,9 +22,9 @@ func (k keyMap) ShortHelp() []key.Binding {
 
 func (k keyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
-		{k.Up, k.Down, k.Select},                          //First Column
-		{k.MinuteUp, k.MinuteDown, k.Quit, k.Redraw},      // Second Column
-		{k.HourUp, k.HourDown, k.ResetDay, k.ResetBucket}, // Third Column
+		{k.Up, k.Down, k.Select},                         //First Column
+		{k.MinuteUp, k.MinuteDown, k.HourUp, k.HourDown}, // Second Column
+		{k.Quit, k.Redraw, k.ResetDay, k.ResetBucket},    // Third Column
 	}
 }
 
@@ -57,6 +57,7 @@ func setKeyMap() keyMap {
 		ResetBucket: key.NewBinding(
 			key.WithKeys("ctrl+b"),
 			key.WithHelp("ctrl+b", "Reset Bucket"),
+			key.WithDisabled(), // TODO
 		),
 		MinuteUp: key.NewBinding(
 			key.WithKeys("w"),

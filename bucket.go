@@ -102,6 +102,9 @@ func resetDay(m *model) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+// TODO: Calling a reset action on a parent still needs to keep the sum of it's child buckets
+// parent 6 hours; child1 2 hours, child2 2 hours
+// resetBucket on the parent needs to set 4 hours and not 0 hours
 func resetBucket(m *model) (tea.Model, tea.Cmd) {
 	// Move the selection away if we're reseting the active bucket
 	if m.cursor == m.selected {
