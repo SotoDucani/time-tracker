@@ -94,17 +94,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		case key.Matches(msg, m.keys.ResetDay):
 			log.Printf("KeyMsg recieved: %s", msg.String())
-			// Halt active ticking, we don't care about the data
-			if m.activeSelection {
-				m.selected = -1
-				m.activeSelection = false
-			}
-			// Loop through all buckets and set time to 0
-			for i := range m.buckets {
-				m.buckets[i].elapsedTime = 0 * time.Second
-				storeBucketData(m.buckets[i], m.datastore)
-			}
-			return m, nil
+			return resetDay(&m)
+		case key.Matches(msg, m.keys.ResetBucket):
+			log.Printf("KeyMsg recieved: %s", msg.String())
+			return resetBucket(&m)
 		}
 	case elapsedTickMsg:
 		// Doing this at slower tick pace so we're not tying updates to the spinner FPS

@@ -3,22 +3,23 @@ package main
 import "github.com/charmbracelet/bubbles/key"
 
 type keyMap struct {
-	Up       key.Binding
-	Down     key.Binding
-	Select   key.Binding
-	Quit     key.Binding
-	Redraw   key.Binding
-	ResetDay key.Binding
+	Up          key.Binding
+	Down        key.Binding
+	Select      key.Binding
+	Quit        key.Binding
+	Redraw      key.Binding
+	ResetDay    key.Binding
+	ResetBucket key.Binding
 }
 
 func (k keyMap) ShortHelp() []key.Binding {
-	return []key.Binding{k.Up, k.Down, k.Select, k.Quit, k.Redraw, k.ResetDay}
+	return []key.Binding{k.Up, k.Down, k.Select, k.Quit, k.Redraw, k.ResetDay, k.ResetBucket}
 }
 
 func (k keyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
-		{k.Up, k.Down, k.Select},       //First Column
-		{k.Quit, k.Redraw, k.ResetDay}, // Second Column
+		{k.Up, k.Down, k.Select},                      //First Column
+		{k.Quit, k.Redraw, k.ResetDay, k.ResetBucket}, // Second Column
 	}
 }
 
@@ -47,6 +48,10 @@ func setKeyMap() keyMap {
 		ResetDay: key.NewBinding(
 			key.WithKeys("ctrl+r"),
 			key.WithHelp("ctrl+r", "Reset Day"),
+		),
+		ResetBucket: key.NewBinding(
+			key.WithKeys("ctrl+b"),
+			key.WithHelp("ctrl+b", "Reset Bucket"),
 		),
 	}
 }
