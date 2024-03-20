@@ -15,6 +15,35 @@ type timeBucket struct {
 	elapsedTime  time.Duration
 }
 
+func addIncrementTime(increment time.Duration, m *model) {
+	// We operate on the CURSOR targeted bucket here
+	// Update the cursor bucket
+	if m.buckets[m.cursor].elapsedTime >= increment.Abs() || increment > 0*time.Second {
+		m.buckets[m.cursor].elapsedTime += increment
+	} else {
+		m.buckets[m.cursor].elapsedTime = 0 * time.Second
+	}
+	storeBucketData(m.buckets[m.cursor], m.datastore)
+
+	// Update the parent bucket
+	if m.buckets[m.buckets[m.cursor].parentBucket].elapsedTime >= increment.Abs() || increment > 0*time.Second {
+		m.buckets[m.buckets[m.cursor].parentBucket].elapsedTime += increment
+	} else {
+		m.buckets[m.buckets[m.cursor].parentBucket].elapsedTime = 0 * time.Second
+	}
+	storeBucketData(m.buckets[m.buckets[m.cursor].parentBucket], m.datastore)
+
+	// Update the total, if we happen to be operating on a second level bucket
+	if m.buckets[m.cursor].level == "second" {
+		if m.buckets[0].elapsedTime >= increment.Abs() || increment > 0*time.Second {
+			m.buckets[0].elapsedTime += increment
+		} else {
+			m.buckets[0].elapsedTime += 0 * time.Second
+		}
+		storeBucketData(m.buckets[0], m.datastore)
+	}
+}
+
 func addElapsedTime(startTime time.Time, m *model) {
 	// Update the selected bucket
 	m.buckets[m.selected].elapsedTime += time.Since(m.buckets[m.selected].startTime)
@@ -90,5 +119,25 @@ func resetBucket(m *model) (tea.Model, tea.Cmd) {
 	// Set the actioned bucket time to 0
 	m.buckets[m.cursor].elapsedTime = 0 * time.Second
 	storeBucketData(m.buckets[m.cursor], m.datastore)
+	return m, nil
+}
+
+func minuteUp(m *model) (tea.Model, tea.Cmd) {
+	addIncrementTime(15*time.Minute, m)
+	return m, nil
+}
+
+func minuteDown(m *model) (tea.Model, tea.Cmd) {
+	addIncrementTime(-15*time.Minute, m)
+	return m, nil
+}
+
+func hourUp(m *model) (tea.Model, tea.Cmd) {
+	addIncrementTime(1*time.Hour, m)
+	return m, nil
+}
+
+func hourDown(m *model) (tea.Model, tea.Cmd) {
+	addIncrementTime(-1*time.Hour, m)
 	return m, nil
 }

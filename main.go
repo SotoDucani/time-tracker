@@ -63,6 +63,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.ResetBucket):
 			log.Printf("KeyMsg recieved: %s", msg.String())
 			return resetBucket(&m)
+		case key.Matches(msg, m.keys.MinuteUp):
+			log.Printf("KeyMsg recieved: %s", msg.String())
+			return minuteUp(&m)
+		case key.Matches(msg, m.keys.MinuteDown):
+			log.Printf("KeyMsg recieved: %s", msg.String())
+			return minuteDown(&m)
+		case key.Matches(msg, m.keys.HourUp):
+			log.Printf("KeyMsg recieved: %s", msg.String())
+			return hourUp(&m)
+		case key.Matches(msg, m.keys.HourDown):
+			log.Printf("KeyMsg recieved: %s", msg.String())
+			return hourDown(&m)
 		}
 	case elapsedTickMsg:
 		// Doing this at slower tick pace so we're not tying updates to the spinner FPS

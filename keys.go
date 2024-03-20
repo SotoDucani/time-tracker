@@ -10,6 +10,10 @@ type keyMap struct {
 	Redraw      key.Binding
 	ResetDay    key.Binding
 	ResetBucket key.Binding
+	MinuteUp    key.Binding
+	MinuteDown  key.Binding
+	HourUp      key.Binding
+	HourDown    key.Binding
 }
 
 func (k keyMap) ShortHelp() []key.Binding {
@@ -18,8 +22,9 @@ func (k keyMap) ShortHelp() []key.Binding {
 
 func (k keyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
-		{k.Up, k.Down, k.Select},                      //First Column
-		{k.Quit, k.Redraw, k.ResetDay, k.ResetBucket}, // Second Column
+		{k.Up, k.Down, k.Select},                          //First Column
+		{k.MinuteUp, k.MinuteDown, k.Quit, k.Redraw},      // Second Column
+		{k.HourUp, k.HourDown, k.ResetDay, k.ResetBucket}, // Third Column
 	}
 }
 
@@ -52,6 +57,22 @@ func setKeyMap() keyMap {
 		ResetBucket: key.NewBinding(
 			key.WithKeys("ctrl+b"),
 			key.WithHelp("ctrl+b", "Reset Bucket"),
+		),
+		MinuteUp: key.NewBinding(
+			key.WithKeys("w"),
+			key.WithHelp("w", "+15 Minutes"),
+		),
+		MinuteDown: key.NewBinding(
+			key.WithKeys("s"),
+			key.WithHelp("s", "-15 Minutes"),
+		),
+		HourUp: key.NewBinding(
+			key.WithKeys("e"),
+			key.WithHelp("e", "+1 Hour"),
+		),
+		HourDown: key.NewBinding(
+			key.WithKeys("d"),
+			key.WithHelp("d", "-1 Hour"),
 		),
 	}
 }
